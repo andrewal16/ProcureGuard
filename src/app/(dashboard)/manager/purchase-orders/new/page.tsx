@@ -1,22 +1,8 @@
-import { redirect } from "next/navigation";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { CreatePOClient } from "@/components/po/create-po-client";
-
-export default async function NewPurchaseOrderPage() {
-  const supabase = await createServerSupabaseClient();
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) redirect("/login");
-
-  const { data: profile } = await supabase
-    .from("user_profiles")
-    .select("role, branch_id")
-    .eq("id", auth.user.id)
-    .single();
-
-  if (!profile || profile.role !== "manager" || !profile.branch_id) redirect("/");
-
-  const { data: products } = await supabase.from("products").select("id, name, category, unit").order("name", { ascending: true });
-  const { data: branch } = await supabase.from("branches").select("name").eq("id", profile.branch_id).single();
-
-  return <CreatePOClient products={products || []} branchName={branch?.name || "Unknown Branch"} />;
+export default function NewPurchaseOrder() {
+  return (
+    <div>
+      <h1 className="text-2xl font-bold">Buat Purchase Order Baru</h1>
+      <p className="text-muted-foreground mt-1">Form pembuatan PO dengan price comparison. (Phase 2)</p>
+    </div>
+  );
 }
