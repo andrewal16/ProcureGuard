@@ -10,6 +10,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Shield, Loader2, Eye, EyeOff } from "lucide-react";
 
+const ROLE_HOME: Record<string, string> = {
+  owner: "/owner",
+  manager: "/manager",
+  vendor: "/vendor",
+  admin: "/admin",
+};
+
 const DEMO_ACCOUNTS = [
   { email: "owner@procureguard.demo", role: "Owner", color: "bg-purple-100 text-purple-700" },
   { email: "manager.jkt@procureguard.demo", role: "Manager Jakarta", color: "bg-blue-100 text-blue-700" },
@@ -46,8 +53,33 @@ export default function LoginPage() {
       return;
     }
 
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setError("Session login tidak ditemukan. Coba login ulang.");
+      setIsLoading(false);
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from("user_profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    const redirectPath = profile?.role ? ROLE_HOME[profile.role] : undefined;
+
+    if (!redirectPath) {
+      setError("Role akun tidak valid. Hubungi admin.");
+      await supabase.auth.signOut();
+      setIsLoading(false);
+      return;
+    }
+
     router.refresh();
-    router.push("/");
+    router.replace(redirectPath);
   }
 
   function fillDemo(demoEmail: string) {
