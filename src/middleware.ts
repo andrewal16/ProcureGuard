@@ -41,7 +41,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // 2. Logged in but on /login → redirect to role home
-  if (supabase && user && path.startsWith("/login")) {
+  if (user && path.startsWith("/login")) {
     const { data: profile } = await supabase
       .from("user_profiles")
       .select("role")
@@ -53,7 +53,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // 3. Role-based access control
-  if (supabase && user) {
+  if (user) {
     const { data: profile } = await supabase
       .from("user_profiles")
       .select("role")
